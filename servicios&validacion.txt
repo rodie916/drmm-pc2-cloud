@@ -1,0 +1,43 @@
+*********************************************
+# Servicios a desplegar
+
+services:
+  jupyter:
+    image: jupyter/minimal-notebook:latest
+    container_name: jupyter_lab
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_TOKEN=lab2025
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      - POSTGRES_DB=datos
+      - POSTGRES_USER=usuario
+      - POSTGRES_PASSWORD=clave123
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+
+*********************************************
+# Use este código de validación en el notebook de jupyter:
+
+!pip install psycopg2-binary pandas sqlalchemy matplotlib
+
+from sqlalchemy import create_engine
+import pandas as pd
+
+engine = create_engine("postgresql+psycopg2://usuario:clave123@db:5432/datos")
+pd.read_sql("SELECT version();", engine)
+
+# Salida referencial: PostgreSQL 16.10 (Debian 16.10-1.pgdg13+1) on ...
